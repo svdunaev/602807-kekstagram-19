@@ -9,7 +9,7 @@ var getRandomArray = function (min, max) {
   return arr;
 };
 
-var shuffle = function (a) {
+var shuffleArray = function (a) {
   var j;
   var x;
   var i;
@@ -26,7 +26,7 @@ var getRandomAmount = function (max) {
   return Math.floor(Math.random() * Math.floor(max));
 };
 
-var phrases = ['Всё отлично!',
+var PHRASES = ['Всё отлично!',
   'В целом всё неплохо. Но не всё.',
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
   'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
@@ -43,7 +43,7 @@ var commentsArray = [];
 
 for (var i = 0; i < 5; i++) {
   userName = namesOptions[Math.floor(Math.random() * namesOptions.length)];
-  commentMessage = phrases[Math.floor(Math.random() * phrases.length)];
+  commentMessage = PHRASES[Math.floor(Math.random() * PHRASES.length)];
   avatarUrl = 'img/avatar-' + getRandomAmount(6) + '.svg';
 
   commentsArray.push({
@@ -54,9 +54,12 @@ for (var i = 0; i < 5; i++) {
 }
 
 var shuffledUrlArray = [];
-shuffledUrlArray = shuffle(getRandomArray(1, 25));
-var shuffledLikesArray = [];
-shuffledLikesArray = shuffle(getRandomArray(15, 186));
+shuffledUrlArray = shuffleArray(getRandomArray(1, 25));
+
+function getRandomInt(min, max) {
+  var randInt = min + Math.floor(Math.random() * (max - min + 1));
+  return randInt;
+}
 
 var photos = [];
 
@@ -66,8 +69,8 @@ var photoLikes = 0;
 var photoComments = 0;
 
 for (i = 0; i < 25; i++) {
-  photoUrl = 'photos/' + shuffledUrlArray[3] + '.jpg';
-  photoLikes = shuffledLikesArray[3];
+  photoUrl = 'photos/' + shuffledUrlArray[i] + '.jpg';
+  photoLikes = getRandomInt(15, 186);
   photoDescription = 'Строка. Описание фотографии';
   photoComments = commentsArray[Math.floor(Math.random() * commentsArray.length)];
 
@@ -83,28 +86,20 @@ var pictureContainer = document.querySelector('.pictures');
 
 var pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-for (i = 0; i < photos.length; i++) {
+var renderPicture = function (photo) {
   var pictureElement = pictureTemplate.cloneNode(true);
 
-  pictureElement.querySelector('.picture__img').src = 'photos/1.jpg';
+  pictureElement.querySelector('.picture__img').src = photo.url;
+  pictureElement.querySelector('.picture__comments').textContent = photo.comments;
+  pictureElement.querySelector('.picture__likes').innerText = photo.likes;
 
-  pictureContainer.appendChild(pictureElement);
-}
-
-
-/**
-var renderPicture = function () {
-  var pictureElement = pictureTemplate.cloneNode(true);
-
-  pictureElement.querySelector('.picture__img').src = photos.url;
-  pictureElement.querySelector('.picture__comments').textContent = photos.comments;
-  // pictureElement.querySelector('.picutre__likes').textContent = photos.likes;
+  return pictureElement;
 };
 
 var fragment = document.createDocumentFragment();
 for (var j = 0; j < photos.length; j++) {
   fragment.appendChild(renderPicture(photos[j]));
-};
+}
 
 pictureContainer.appendChild(fragment);
-*/
+
