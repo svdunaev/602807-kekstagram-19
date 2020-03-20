@@ -22,9 +22,10 @@ var shuffleArray = function (a) {
   return a;
 };
 
-var getRandomAmount = function (max) {
-  return Math.floor(Math.random() * Math.floor(max));
-};
+function getRandomInt(min, max) {
+  var randInt = min + Math.floor(Math.random() * (max - min + 1));
+  return randInt;
+}
 
 var PHRASES = [
   'Всё отлично!',
@@ -48,7 +49,7 @@ var commentsArray = [];
 for (var i = 0; i < 5; i++) {
   userName = NAMES_OPTIONS[Math.floor(Math.random() * NAMES_OPTIONS.length)];
   commentMessage = PHRASES[Math.floor(Math.random() * PHRASES.length)];
-  avatarUrl = 'img/avatar-' + getRandomAmount(6) + '.svg';
+  avatarUrl = 'img/avatar-' + getRandomInt(1, 6) + '.svg';
 
   commentsArray.push({
     avatar: avatarUrl,
@@ -59,11 +60,6 @@ for (var i = 0; i < 5; i++) {
 
 var shuffledUrlArray = [];
 shuffledUrlArray = shuffleArray(getRandomArray(1, 25));
-
-function getRandomInt(min, max) {
-  var randInt = min + Math.floor(Math.random() * (max - min + 1));
-  return randInt;
-}
 
 var getSlicedArray = function (arr) {
   var slicedArray = arr.slice(getRandomInt(1, 5));
@@ -123,17 +119,95 @@ var bigPictureImg = document.querySelector('div.big-picture__img img');
 var bigPictureLikesCount = document.querySelector('.likes-count');
 var bigPictureCommentsCount = document.querySelector('.comments-count');
 var bigPictureDescription = document.querySelector('.social__caption');
-var socialCommentsList = document.querySelector('.social__comments');
+var bigPictureComments = document.querySelector('.social__comments');
+
+var makeElement = function (tagName, className, text) {
+  var element = document.createElement(tagName);
+  element.classList.add(className);
+  if (text) {
+    element.textContent = text;
+  }
+  return element;
+};
 
 var renderBigPicture = function (photo) {
-
   bigPictureImg.src = photo.url;
   bigPictureCommentsCount.textContent = photo.comments.length;
   bigPictureLikesCount.textContent = photo.likes;
   bigPictureDescription.textContent = photo.description;
+  if (photo.comments.length > 0) {
+    fragment = document.createDocumentFragment();
+    for (i = 0; i < photo.comments.length; i++) {
+      var socialComment = makeElement('li', 'social__comment');
+      var userPic = makeElement('img', 'social__picture');
+      userPic.src = photo.comments[i].avatar;
+      userPic.alt = photo.comments[i].name;
+      socialComment.appendChild(userPic);
+      var socialText = makeElement('p', 'social__text', photo.comments[i].message);
+      socialComment.appendChild(socialText);
+      fragment.appendChild(socialComment);
+    }
+
+    bigPictureComments.appendChild(fragment);
+  }
 };
 
-fragment = document.createDocumentFragment();
-for (j = 0; j < photos.length; j++) {
-  fragment.appendChild(renderBigPicture(photos[j]));
-}
+renderBigPicture(photos[0]);
+var closeBigPicture = document.querySelector('.big-picture__cancel');
+
+closeBigPicture.addEventListener('click', function () {
+  bigPictureContainer.classList.add('hidden');
+});
+
+var openUploaderForm = document.querySelector('.img-upload__start');
+var uploadOverlay = document.querySelector('.img-upload__overlay');
+
+openUploaderForm.addEventListener('click', function (evt) {
+  evt.preventDefault();
+  uploadOverlay.classList.remove('hidden');
+});
+
+var imgUploadCancel = document.querySelector('.img-upload__cancel');
+imgUploadCancel.addEventListener('click', function () {
+  uploadOverlay.classList.add('hidden');
+
+});
+document.addEventListener('keydown', function (evt) {
+  if (evt.key === 'Escape') {
+    uploadOverlay.classList.add('hidden');
+  }
+});
+
+var scaleControlSmaller = document.querySelector('.scale__control--smaller');
+var scaleControlBigger = document.querySelector('.scale__control--bigger');
+var scaleControlValue = document.querySelector('.scale__control--value');
+scaleControlValue.setAttribute('value', '100%');
+
+var MAX_SCALE_VALUE = 100;
+var MIN_SCALE_VALUE = 25;
+var STEP_VALUE = 25;
+
+var getBiggerScale = function (step) {
+  var scaleValue = parseInt(scaleControlValue.value, 10);
+  var newScaleValue = scaleValue += step;
+  if (newScaleValue >= MAX_SCALE_VALUE) {
+    return MAX_SCALE_VALUE + '%';
+  }
+  return newScaleValue + '%';
+};
+
+var getSmallerScale = function (step) {
+  var scaleValue = parseInt(scaleControlValue.value, 10);
+  var newScaleValue = scaleValue -= step;
+  if (newScaleValue <= MIN_SCALE_VALUE) {
+    return MIN_SCALE_VALUE + '%';
+  }
+  return newScaleValue + '%';
+};
+
+scaleControlBigger.addEventListener('click', function () {
+  scaleControlValue.setAttribute('value', getBiggerScale(STEP_VALUE));
+});
+scaleControlSmaller.addEventListener('click', function () {
+  scaleControlValue.setAttribute('value', getSmallerScale(STEP_VALUE));
+});
